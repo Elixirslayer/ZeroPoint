@@ -3,23 +3,37 @@
 
 EAPI=8
 
-EGIT_REPO_URI="https://gitlab.com/Elixirslayer/dwl.git"
-inherit savedconfig toolchain-funcs git-r3
+inherit savedconfig toolchain-funcs
+
+if [[ ${PV} == 9999 ]]; then
+	EGIT_REPO_URI="https://gitlab.com/Elixirslayer/dwl.git"
+	inherit git-r3
+else
+	MY_PV="${PV/_rc/-rc}"
+	MY_P="${PN}-v${MY_PV}"
+	SRC_URI="https://gitlab.com/Elixirslayer/{PN}/releases/download/v${MY_PV}/${MY_P}.tar.gz"
+	S="${WORKDIR}/${MY_P}"
+	KEYWORDS="~amd64 ~arm64 ~ppc64 ~x86"
+fi
 
 DESCRIPTION="dwm for Wayland"
-HOMEPAGE="https://gitlab.com/Elixirslayer/dwl"
+HOMEPAGE="https://codeberg.org/dwl/dwl"
 
 LICENSE="CC0-1.0 GPL-3+ MIT"
 SLOT="0"
 IUSE="X"
 
-KEYWORDS="~amd64 ~arm64"
+if [[ ${PV} == 9999 ]]; then
+	COMMON_DEPEND="~gui-libs/wlroots-9999:=[libinput,session,X?]"
+else
+	COMMON_DEPEND="
+		>=gui-libs/wlroots-0.19:=[libinput,session,X?]
+		<gui-libs/wlroots-0.20:="
+fi
 
 COMMON_DEPEND+="
 	dev-libs/libinput:=
 	dev-libs/wayland
-	>=gui-libs/wlroots-0.19:=[libinput,session,X?]
-	<gui-libs/wlroots-0.20:=
 	x11-libs/libxkbcommon
 	X? (
 		x11-libs/libxcb:=
